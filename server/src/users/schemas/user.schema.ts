@@ -57,17 +57,26 @@ export class User {
     isVerified!: boolean;
 
     @Prop({
-    default:null,
-    select:false
+    type: String,
+    default: null,
+    select: false
     })
-    refreshToken?: string;
+    refreshToken!: string | null;
 
     // Forgot Password OTP
-    @Prop()
-    passwordResetOtp?: string;
+    @Prop({
+    type: String,
+    default: null,
+    select: false,
+    })
+    passwordResetOtp!: string | null;
 
-    @Prop()
-    passwordResetOtpExpires?: Date;
+    @Prop({
+    type: Date,
+    default: null,
+    select: false,
+    })
+    passwordResetOtpExpires!: Date | null;
 
     @Prop({
         default: "",

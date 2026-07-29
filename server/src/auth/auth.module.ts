@@ -7,12 +7,15 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { RolesGuard } from './guards/roles.guard';
+import { AuthSeeder } from './auth.seeder';
+import { MailModule } from 'src/mail/mail.module';
 
 
 
 @Module({
   imports: [
     ConfigModule,
+    MailModule,
 
     MongooseModule.forFeature([
       {
@@ -33,7 +36,7 @@ import { RolesGuard } from './guards/roles.guard';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, RolesGuard],
+  providers: [AuthService, JwtStrategy, RolesGuard, AuthSeeder],
   exports: [AuthService],
 })
 export class AuthModule {}
