@@ -70,6 +70,11 @@ export class User {
         default: "",
     })
     profileImage!: string;
+
+    @Prop({
+        default: true
+    })
+    isActive!: boolean;
 }
 
 
