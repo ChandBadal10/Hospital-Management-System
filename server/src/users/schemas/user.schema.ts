@@ -56,7 +56,10 @@ export class User {
     })
     isVerified!: boolean;
 
-    @Prop()
+    @Prop({
+    default:null,
+    select:false
+    })
     refreshToken?: string;
 
     // Forgot Password OTP
