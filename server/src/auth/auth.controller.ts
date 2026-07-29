@@ -10,6 +10,8 @@ import { Roles } from './decorators/roles.decorator';
 import { Role } from 'src/users/enums/role.enum';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -91,6 +93,21 @@ export class AuthController {
     }
 
 
+    //verify otp
 
+    @Post("verify-otp")
+    verifyOtp(
+        @Body() verifyOtpDto: VerifyOtpDto
+    ) {
+        return this.authService.verifyOtp(verifyOtpDto);
+    }
+
+    //Reset password
+    @Post("reset-password")
+    resetPassword(
+        @Body() resetPasswordDto: ResetPasswordDto,
+    ) {
+        return this.authService.resetPassword(resetPasswordDto)
+    }
 }
 
