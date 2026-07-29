@@ -11,6 +11,8 @@ import { ConfigService } from '@nestjs/config';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { MailService } from 'src/mail/mail.service';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 
 
@@ -248,5 +250,74 @@ export class AuthService {
         success: true,
         message: "OTP sent successfully to your email.",
         };
+    }
+
+
+
+    //Verify otp
+    async verifyOtp(verifyOtpDto: VerifyOtpDto) {
+        const {email, otp} = verifyOtpDto;
+
+        //Find User
+        const user = await this.userModel.findOne({email}).select("+passwordResetOtp +passwordResetOtpExpires");
+
+        if(!user) {
+            throw new BadRequestException("User not found");
+        }
+
+        //Check OTP exist
+        if(!user.passwordResetOtp || !user.passwordResetOtpExpires) {
+            throw new BadRequestException("OTP not found");
+        }
+
+        //Check expiry
+
+        if(user.passwordResetOtpExpires < new Date()) {
+            throw new BadRequestException("OTP has expired")
+        }
+
+        //compare otp
+
+        const isOtpMatched = await bcrypt.compare(otp, user.passwordResetOtp);
+
+        if(!isOtpMatched) {
+            throw new BadRequestException("Invalid OTP")
+        }
+
+        return {
+            success: true,
+            message: "OTP veriofied successfully"
+        }
+    }
+
+
+    //reset password
+    async resetPassword(resetPasswordDto: ResetPasswordDto) {
+        const {email, newPassword} = resetPasswordDto;
+
+        //FindUser
+        const user = await this.userModel.findOne({email});
+
+        if(!user) {
+            throw new BadRequestException("User not found");
+        }
+
+        //Hash new password
+
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+        user.password = hashedNewPassword;
+
+        user.passwordResetOtp = null;
+        user.passwordResetOtpExpires = null;
+
+        user.refreshToken = null;
+
+        await user.save();
+
+        return {
+            success: true,
+            message: "Password reset successfully",
+        }
     }
 }
