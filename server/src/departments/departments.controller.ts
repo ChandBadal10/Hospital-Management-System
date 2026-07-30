@@ -1,6 +1,11 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Role } from 'src/users/enums/role.enum';
+import { UpdateDepartmentDto } from './dto/update-department.dto';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Controller('departments')
 export class DepartmentsController {
@@ -14,5 +19,33 @@ export class DepartmentsController {
         @Body() createDepartmentDto: CreateDepartmentDto,
     ) {
         return this.departmentsService.createDepartment(createDepartmentDto);
+    }
+
+    //get all departments
+    @Get()
+    getAllDepartments() {
+        return this.departmentsService.getAllDepartments();
+    }
+
+    //get department by id
+
+    @Get(":id")
+    getDepartmentById(
+        @Param("id") id: string
+    ) {
+        return this.departmentsService.getDepartmentById(id);
+    }
+
+
+
+    //Update department
+    @Patch(":id")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    updateDepartment(
+        @Param("id") id: string,
+        @Body() updateDepartmentDto: UpdateDepartmentDto
+    ) {
+        return this.departmentsService.updateDepartment(id, updateDepartmentDto);
     }
 }
