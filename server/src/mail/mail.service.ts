@@ -74,4 +74,42 @@ export class MailService {
       `,
     });
   }
+
+
+ async sendPatientCredentials(
+  email: string,
+  password: string,
+) {
+  await this.transporter.sendMail({
+    from: `"Hospital Management System" <${this.configService.get("SENDER_EMAIL")}>`,
+    to: email,
+    subject: "Patient Account Created",
+
+    html: `
+      <h2>Welcome to Hospital Management System</h2>
+
+      <p>Dear Patient,</p>
+
+      <p>Your patient account has been created successfully.</p>
+
+      <hr>
+
+      <p><strong>Email:</strong> ${email}</p>
+
+      <p><strong>Temporary Password:</strong> ${password}</p>
+
+      <hr>
+
+      <p>Please login using the above credentials and change your password after your first login.</p>
+
+      <p>We wish you good health.</p>
+
+      <br>
+
+      <p>Regards,</p>
+      <p><strong>Hospital Management System Team</strong></p>
+    `,
+  });
+}
+
 }
