@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -6,6 +6,9 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Role } from 'src/users/enums/role.enum';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+import { GetDepartmentDto } from './dto/gett-department.dto';
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
+import type { CurrentUser } from 'src/auth/interfaces/current-user.interface';
 
 @Controller('departments')
 export class DepartmentsController {
@@ -15,16 +18,21 @@ export class DepartmentsController {
 
     //Create Department
     @Post()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
     createDepartment(
         @Body() createDepartmentDto: CreateDepartmentDto,
+        @GetUser() user: CurrentUser,
     ) {
-        return this.departmentsService.createDepartment(createDepartmentDto);
+        return this.departmentsService.createDepartment(createDepartmentDto, user);
     }
 
     //get all departments
     @Get()
-    getAllDepartments() {
-        return this.departmentsService.getAllDepartments();
+    getAllDepartments(
+        @Query() query: GetDepartmentDto,
+    ) {
+        return this.departmentsService.getAllDepartments(query);
     }
 
     //get department by id
@@ -44,9 +52,10 @@ export class DepartmentsController {
     @Roles(Role.ADMIN)
     updateDepartment(
         @Param("id") id: string,
-        @Body() updateDepartmentDto: UpdateDepartmentDto
+        @Body() updateDepartmentDto: UpdateDepartmentDto,
+        @GetUser() user: CurrentUser,
     ) {
-        return this.departmentsService.updateDepartment(id, updateDepartmentDto);
+        return this.departmentsService.updateDepartment(id, updateDepartmentDto, user);
     }
 
 
