@@ -46,6 +46,7 @@ export class DoctorsController {
     }
 
 
+    //update doctor info
     @Patch(":id")
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
@@ -55,5 +56,28 @@ export class DoctorsController {
         @GetUser() user: CurrentUser,
     ) {
         return this.doctorsService.updateDoctor(id, updateDoctorDto, user)
+    }
+
+    //delete doctor
+
+    @Patch(":id/delete")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    deleteDoctor(
+        @Param("id") id: string,
+        @GetUser() user: CurrentUser,
+    ) {
+        return this.doctorsService.deleteDoctor(id, user);
+    }
+
+    //Restore Doctot
+    @Patch(":id/restore")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    restoreDoctor(
+        @Param("id") id: string,
+        @GetUser() user: CurrentUser
+    ) {
+        return this.doctorsService.restoreDoctor(id, user)
     }
 }
