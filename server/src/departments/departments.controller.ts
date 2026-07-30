@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -48,4 +48,28 @@ export class DepartmentsController {
     ) {
         return this.departmentsService.updateDepartment(id, updateDepartmentDto);
     }
+
+
+    //delete department
+    @Patch(":id/delete")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    deleteDepartment(
+        @Param("id") id: string
+    ) {
+        return this.departmentsService.deleteDepartment(id)
+    }
+
+    //restore department
+
+    @Patch(":id/restore")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    restoreDepartment(
+        @Param("id") id: string
+    ) {
+        return this.departmentsService.restoreDepartment(id);
+    }
+
+
 }
