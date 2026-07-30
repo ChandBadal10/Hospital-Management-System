@@ -101,4 +101,60 @@ export class DepartmentsService {
             data: department
         }
     }
+
+
+    //Soft delete department
+
+    async deleteDepartment(id: string) {
+        if(!Types.ObjectId.isValid(id)) {
+            throw new BadRequestException("Invalid Department ID")
+        }
+
+        const department = await this.departmentModule.findById(id);
+
+        if(!department) {
+            throw new BadRequestException("Department not found")
+        }
+
+        if(!department.isActive) {
+            throw new BadRequestException("Department already deleted");
+        }
+
+        department.isActive = false;
+
+        await department.save();
+
+        return {
+            success: true,
+            message: "Department deleted successfully"
+        };
+    }
+
+
+    //Restore department
+    async restoreDepartment(id: string) {
+        if(!Types.ObjectId.isValid(id)) {
+            throw new BadRequestException("Invalid Department ID");
+        }
+
+        const department = await this.departmentModule.findById(id);
+
+        if(!department) {
+            throw new BadRequestException("Department not found");
+        }
+
+        if(department.isActive) {
+            throw new BadRequestException("Department is already active")
+        }
+
+        department.isActive = true;
+
+        await department.save();
+
+        return {
+            success: true,
+            message: "Department restored successfully",
+            data: department
+        }
+    }
 }
