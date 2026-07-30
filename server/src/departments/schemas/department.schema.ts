@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument, Types } from "mongoose";
+import mongoose, { HydratedDocument, Types } from "mongoose";
+import { User } from "src/users/schemas/user.schema";
 
 
 
@@ -37,16 +38,16 @@ export class Department {
     isActive!: boolean;
 
     @Prop({
-        type: Types.ObjectId,
-        ref: "User",
+    type: mongoose.Schema.Types.ObjectId,
+    ref: User.name,
     })
-    createdBy!: Types.ObjectId;
+    createdBy?: Types.ObjectId;
 
     @Prop({
-        type: Types.ObjectId,
-        ref: "User",
+    type: mongoose.Schema.Types.ObjectId,
+    ref: User.name,
     })
-    updatedBy!: Types.ObjectId;
+    updatedBy?: Types.ObjectId;
 
 }
 
