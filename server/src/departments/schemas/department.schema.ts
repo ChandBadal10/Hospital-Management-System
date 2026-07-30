@@ -23,7 +23,7 @@ export class Department {
         required: true,
         trim: true
     })
-    description!: true
+    description!: string;
 
 
     @Prop({
@@ -49,4 +49,5 @@ export class Department {
     updatedBy!: Types.ObjectId;
 
 }
-    export const DepartmentSchema = SchemaFactory.createForClass(Department);
+
+export const DepartmentSchema = SchemaFactory.createForClass(Department);
