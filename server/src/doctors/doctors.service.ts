@@ -240,4 +240,87 @@ export class DoctorsService {
         data: updatedDoctor,
         };
     }
+
+
+    //Delete Doctor
+    async deleteDoctor(id: string, user: CurrentUser) {
+        if(!Types.ObjectId.isValid(id)) {
+            throw new BadRequestException("Invalid Doctor ID");
+        }
+
+        const doctor = await this.doctorModel.findById(id);
+
+        if(!doctor) {
+            throw new BadRequestException("Doctor not found");
+        }
+
+        if(!doctor.isActive) {
+            throw new BadRequestException("Doctor already deleted");
+        }
+
+        //Find user
+        const doctorUser = await this.userModel.findById(doctor.user);
+
+        if(!doctorUser) {
+            throw new BadRequestException("User not found")
+        }
+
+
+        doctor.isActive = false;
+        doctor.updatedBy = new Types.ObjectId(user.id);
+
+        doctorUser.isActive = false;
+
+        await doctor.save();
+        await doctorUser.save();
+
+        return {
+            success: true,
+            message: "Doctor deleted successfully",
+        }
+    }
+
+
+    //Restore Doctor
+    async restoreDoctor(id: string, user: CurrentUser) {
+        // Validate Id
+        if(!Types.ObjectId.isValid(id)) {
+            throw new BadRequestException("Invalid Doctor ID")
+        }
+
+
+        //Find Doctor
+        const doctor = await this.doctorModel.findById(id);
+
+        if(!doctor) {
+            throw new BadRequestException("Doctor not found");
+        }
+
+        //Already Active
+        if(doctor.isActive) {
+            throw new BadRequestException("Doctor is already active")
+        }
+
+        //Find user
+        const doctorUser = await this.userModel.findById(doctor.user);
+
+        if(!doctorUser) {
+            throw new BadRequestException("User not found")
+        }
+
+        //Restore
+        doctor.isActive = true;
+        doctor.updatedBy = new Types.ObjectId(user.id)
+
+        doctorUser.isActive = true;
+
+        //Save
+        await doctor.save()
+        await doctorUser.save();
+
+        return {
+            success: true,
+            message: "Doctor restored successfully",
+        }
+    }
 }
