@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Doctor, DoctorDocument } from './schemas/doctor.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { User, UserDocument } from 'src/users/schemas/user.schema';
 import { Department, DepartmentDocument } from 'src/departments/schemas/department.schema';
 import { MailService } from 'src/mail/mail.service';
@@ -9,6 +9,7 @@ import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { CurrentUser } from 'src/auth/interfaces/current-user.interface';
 import * as bcrypt from 'bcryptjs';
 import { Role } from 'src/users/enums/role.enum';
+import { UpdateDoctorDto } from './dto/update-doctor.dot';
 
 
 
@@ -26,6 +27,9 @@ export class DoctorsService {
 
         private readonly mailService: MailService,
     ) {}
+
+
+
 
     //Create doctor
 
@@ -87,4 +91,153 @@ export class DoctorsService {
         };
     }
 
+
+    //Get All Doctors
+    async getAllDoctors() {
+        const doctors = await this.doctorModel
+        .find({isActive: true})
+        .populate("user", "firstName lastName email phone")
+        .populate("departmentId", "name description")
+        .populate("createdBy", "firstName lastName")
+        .populate("updatedBy", "firstName lastName")
+        .sort({ createdAt: -1 });
+
+
+        return {
+            success: true,
+            message: "Doctors fetched successfully",
+            data: doctors
+        }
+    }
+
+
+
+    //Get doctor by id
+    async getDoctorById(id: string) {
+        if(!Types.ObjectId.isValid(id)) {
+            throw new BadRequestException("Invalid Doctor ID")
+        }
+
+        const doctor = await this.doctorModel.findById(id)
+        .populate("user", "firstName lastName email phone")
+        .populate("departmentId", "name description")
+        .populate("createdBy", "firstName lastName")
+        .populate("updatedBy", "firstName lastName");
+
+        if(!doctor) {
+            throw new BadRequestException("Doctor not found");
+        }
+
+        return {
+            success: true,
+            message: "Doctor Fetched successfully",
+            data: doctor
+        }
+
+    }
+
+    //Update Doctor info
+    async updateDoctor(id: string, updateDoctorDto: UpdateDoctorDto, user: CurrentUser) {
+        if(!Types.ObjectId.isValid(id)) {
+            throw new BadRequestException("Invalid Doctor Id")
+        }
+
+        const doctor = await this.doctorModel.findById(id);
+        if(!doctor) {
+            throw new BadRequestException("Doctor not found");
+        }
+
+        const doctorUser = await this.userModel.findById(doctor.user);
+
+        if(!doctorUser) {
+            throw new BadRequestException("User not found");
+        }
+
+        if(updateDoctorDto.firstName) {
+            doctorUser.firstName = updateDoctorDto.firstName;
+        }
+
+        if(updateDoctorDto.lastName) {
+            doctorUser.lastName = updateDoctorDto.lastName;
+        }
+
+        if(updateDoctorDto.email) {
+            doctorUser.email = updateDoctorDto.email;
+        }
+
+        if(updateDoctorDto.phone) {
+            doctorUser.phone = updateDoctorDto.phone;
+        }
+
+
+        await doctorUser.save();
+
+
+        if(updateDoctorDto.departmentId) {
+            const department = await this.departmentModel.findById(
+                updateDoctorDto.departmentId
+            )
+
+            if(!department) {
+                throw new BadRequestException("Department not found")
+            }
+
+            doctor.departmentId = department._id;
+        }
+
+        if(updateDoctorDto.specialization) {
+            doctor.specialization = updateDoctorDto.specialization;
+        }
+
+        if(updateDoctorDto.qualification) {
+            doctor.qualification = updateDoctorDto.qualification;
+        }
+
+        if(updateDoctorDto.experience !== undefined) {
+            doctor.experience = updateDoctorDto.experience;
+        }
+
+
+        if(updateDoctorDto.consultationFee !== undefined) {
+            doctor.consultationFee = updateDoctorDto.consultationFee;
+        }
+
+
+        if(updateDoctorDto.licenseNumber) {
+            doctor.licenseNumber = updateDoctorDto.licenseNumber;
+        }
+
+        if(updateDoctorDto.bio) {
+            doctor.bio = updateDoctorDto.bio;
+        }
+
+        if(updateDoctorDto.availableDays) {
+            doctor.availableDays = updateDoctorDto.availableDays;
+        }
+
+        if(updateDoctorDto.startTime || updateDoctorDto.endTime) {
+            doctor.availableTime = {
+                startTime: updateDoctorDto.startTime ?? doctor.availableTime.startTime,
+
+                endTime: updateDoctorDto.endTime ?? doctor.availableTime.endTime,
+            }
+        }
+
+        doctor.updatedBy = new Types.ObjectId(user.id);
+
+        await doctor.save();
+
+        const updatedDoctor = await this.doctorModel
+        .findById(doctor._id)
+        .populate("user", "firstName lastName email phone")
+        .populate("departmentId", "name description")
+        .populate("createdBy", "firstName lastName")
+        .populate("updatedBy", "firstName lastName");
+
+        return {
+        success: true,
+        message: "Doctor updated successfully",
+        data: updatedDoctor,
+        };
+    }
 }
