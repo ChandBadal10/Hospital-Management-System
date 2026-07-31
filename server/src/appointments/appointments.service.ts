@@ -9,6 +9,7 @@ import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { CurrentUser } from 'src/auth/interfaces/current-user.interface';
 import { User, UserDocument } from 'src/users/schemas/user.schema';
 import { AppointmentStatus } from './enums/appointment-status.enum';
+import { GetAllAppointmentsDto } from './dto/get-all-appointments.dto';
 
 @Injectable()
 export class AppointmentsService {
@@ -151,5 +152,88 @@ export class AppointmentsService {
     data: appointment,
     };
 
+    }
+
+
+    //Get All Appointments
+    async getAllAppointments(query: GetAllAppointmentsDto) {
+        const page = Number(query.page) || 1;
+        const limit = Number(query.limit) || 10;
+
+        const skip = (page - 1 ) * limit;
+
+
+        const filter: any = {
+            isActive: true,
+        };
+
+        if (query.doctor) {
+        filter.doctor = query.doctor;
+        }
+
+        if (query.patient) {
+        filter.patient = query.patient;
+        }
+
+        if (query.department) {
+        filter.department = query.department;
+        }
+
+        if (query.status) {
+        filter.status = query.status;
+        }
+
+        if (query.paymentStatus) {
+        filter.paymentStatus = query.paymentStatus;
+        }
+
+        if (query.appointmentDate) {
+        const startDate = new Date(query.appointmentDate);
+        const endDate = new Date(query.appointmentDate);
+
+        endDate.setHours(23, 59, 59, 999);
+
+        filter.appointmentDate = {
+            $gte: startDate,
+            $lte: endDate,
+        };
+        }
+
+        const total = await this.appointmentModel.countDocuments(filter);
+
+        const appointments = await this.appointmentModel
+        .find(filter)
+        .populate({
+            path: "patient",
+            populate: {
+            path: "user",
+            select: "firstName lastName email phone",
+            },
+        })
+        .populate({
+            path: "doctor",
+            populate: {
+            path: "user",
+            select: "firstName lastName email phone",
+            },
+        })
+        .populate("department", "name description")
+        .populate("createdBy", "firstName lastName")
+        .populate("updatedBy", "firstName lastName")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+        return {
+            success: true,
+            message: "Appointments fetched successfully",
+            data: appointments,
+            pagination: {
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+            },
+        };
     }
 }

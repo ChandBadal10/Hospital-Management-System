@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -7,6 +7,7 @@ import { Role } from 'src/users/enums/role.enum';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import type { CurrentUser } from 'src/auth/interfaces/current-user.interface';
+import { GetAllAppointmentsDto } from './dto/get-all-appointments.dto';
 
 
 
@@ -26,5 +27,14 @@ export class AppointmentsController {
         @GetUser() user: CurrentUser,
     ) {
         return this.appointmentsService.createAppointment(createAppointmentDto, user)
+    }
+
+
+    @Get()
+    @UseGuards(JwtAuthGuard)
+    getAllAppointments(
+        @Query() query: GetAllAppointmentsDto,
+    ) {
+        return this.appointmentsService.getAllAppointments(query);
     }
 }
