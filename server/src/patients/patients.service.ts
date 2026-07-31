@@ -9,6 +9,7 @@ import { CurrentUser } from 'src/auth/interfaces/current-user.interface';
 import * as bcrypt from 'bcryptjs';
 import { Role } from 'src/users/enums/role.enum';
 import { GetPatientsQueryDto } from './dto/get-patients-query.dto';
+import { UpdatePatientDto } from './dto/update-patient.dto';
 
 
 
@@ -203,6 +204,130 @@ export class PatientsService {
             success: true,
             message: "Patient fetched successfully",
             data: patient
+        }
+    }
+
+
+    // Update Patient by Id
+    async updatePatient(id: string, updatePatientDto: UpdatePatientDto, user: CurrentUser) {
+        if(!Types.ObjectId.isValid(id)) {
+            throw new BadRequestException("Invalid Patient ID");
+        }
+
+        const patient = await this.patientModel.findById(id);
+        if(!patient) {
+            throw new BadRequestException("Patient not found")
+        }
+
+        const patientUser = await this.userModel.findById(patient.user);
+
+        if(!patientUser) {
+            throw new BadRequestException("User not found");
+        }
+
+        //Update User Information
+        if(updatePatientDto.firstName) {
+            patientUser.firstName = updatePatientDto.firstName;
+        }
+
+        if(updatePatientDto.lastName) {
+            patientUser.lastName = updatePatientDto.lastName;
+        }
+
+        if(updatePatientDto.email) {
+            const existingEmail = await this.userModel.findOne({
+                email: updatePatientDto.email,
+                _id: {$ne: patientUser._id},
+            });
+        if(existingEmail) {
+            throw new BadRequestException("Email already exists")
+        }
+        patientUser.email = updatePatientDto.email;
+        }
+
+
+        if(updatePatientDto.phone) {
+        patientUser.phone = updatePatientDto.phone;
+        }
+
+        await patientUser.save();
+
+
+
+        // Update Patient Information
+
+        if (updatePatientDto.gender) {
+            patient.gender = updatePatientDto.gender;
+        }
+
+        if (updatePatientDto.bloodGroup) {
+            patient.bloodGroup = updatePatientDto.bloodGroup;
+        }
+
+        if (updatePatientDto.dateOfBirth) {
+            patient.dateOfBirth = new Date(updatePatientDto.dateOfBirth);
+        }
+
+        if (updatePatientDto.height !== undefined) {
+            patient.height = updatePatientDto.height;
+        }
+
+        if (updatePatientDto.weight !== undefined) {
+            patient.weight = updatePatientDto.weight;
+        }
+
+        if (updatePatientDto.emergencyContactName) {
+            patient.emergencyContactName =
+            updatePatientDto.emergencyContactName;
+        }
+
+        if (updatePatientDto.emergencyContactNumber) {
+            patient.emergencyContactNumber =
+            updatePatientDto.emergencyContactNumber;
+        }
+
+        if (updatePatientDto.address) {
+            patient.address = updatePatientDto.address;
+        }
+
+        if (updatePatientDto.city) {
+            patient.city = updatePatientDto.city;
+        }
+
+        if (updatePatientDto.state) {
+            patient.state = updatePatientDto.state;
+        }
+
+        if (updatePatientDto.country) {
+            patient.country = updatePatientDto.country;
+        }
+
+        if (updatePatientDto.profileImage !== undefined) {
+            patient.profileImage = updatePatientDto.profileImage;
+        }
+
+        if (updatePatientDto.allergies) {
+            patient.allergies = updatePatientDto.allergies;
+        }
+
+        if (updatePatientDto.medicalHistory) {
+            patient.medicalHistory = updatePatientDto.medicalHistory;
+        }
+
+        patient.updatedBy = user.id as any;
+
+        await patient.save();
+
+        const updatePatient = await this.patientModel
+        .findById(patient._id)
+        .populate("user", "firstName lastName email phone")
+        .populate("createdBy", "firstName lastName")
+        .populate("updatedBy", "firstName lastName");
+
+        return {
+            success: true,
+            message: "Patient updated successfully",
+            data: updatePatient,
         }
     }
 }
