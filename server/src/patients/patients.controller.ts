@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { PatientsService } from './patients.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -8,6 +8,7 @@ import { CreatePatientDto } from './dto/create-patient.dto';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import type { CurrentUser } from 'src/auth/interfaces/current-user.interface';
 import { GetPatientsQueryDto } from './dto/get-patients-query.dto';
+import { UpdatePatientDto } from './dto/update-patient.dto';
 
 @Controller('patients')
 export class PatientsController {
@@ -46,5 +47,19 @@ export class PatientsController {
         @Param("id") id: string,
     ) {
         return this.patientsService.getPatientById(id);
+    }
+
+
+    //Update Patient by id
+
+    @Patch(":id")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    updatePatient(
+        @Param("id") id: string,
+        @Body() updatePatientDto: UpdatePatientDto,
+        @GetUser() user: CurrentUser,
+    ) {
+        return this.patientsService.updatePatient(id, updatePatientDto, user)
     }
 }
