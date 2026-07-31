@@ -330,4 +330,97 @@ export class PatientsService {
             data: updatePatient,
         }
     }
+
+
+    //Delete Patient
+    async deletePatient(id: string, user: CurrentUser) {
+        if(!Types.ObjectId.isValid(id)) {
+            throw new BadRequestException("Invalid Patient ID")
+        }
+
+        const patient = await this.patientModel.findById(id);
+
+        if(!patient) {
+            throw new BadRequestException("Patient not found")
+        }
+
+        if(!patient.isActive) {
+            throw new BadRequestException("Patient already deleted")
+        }
+
+
+        //Find User
+        const patientUser = await this.userModel.findById(patient.user);
+
+        if(!patientUser) {
+            throw new BadRequestException("User not found")
+        }
+
+        if(!patientUser.isActive) {
+            throw new BadRequestException("User already deleted")
+        }
+
+
+        patient.isActive = false;
+        patient.updatedBy = new Types.ObjectId(user.id);
+
+        patientUser.isActive = false;
+
+        await patient.save();
+        await patientUser.save();
+
+        return {
+            success: true,
+            message: "Patient deleted successfully"
+        }
+    }
+
+
+    //Restore Patient
+
+    async restorePatient(id: string, user: CurrentUser) {
+        if(!Types.ObjectId.isValid(id)) {
+            throw new BadRequestException("Patient Id not found")
+        }
+
+        const patient = await this.patientModel.findById(id);
+
+        if(!patient) {
+            throw new BadRequestException("Patient not found");
+        }
+
+        if(patient.isActive) {
+            throw new BadRequestException("Patient is already active")
+        }
+
+        // Find USER
+        const patientUser = await this.userModel.findById(patient.user);
+
+        if(!patientUser) {
+            throw new BadRequestException("User not found");
+        }
+
+        // restore patient
+        patient.isActive = true;
+        patient.updatedBy = new Types.ObjectId(user.id)
+
+        patientUser.isActive = true;
+
+        await patient.save();
+        await patientUser.save();
+
+        const updatedPatient = await this.patientModel
+        .findById(patient._id)
+        .populate("user", "firstName lastName email phone")
+        .populate("createdBy", "firstName lastName")
+        .populate("updatedBy", "firstName lastName");
+
+
+        return {
+            success: true,
+            message: "Patient restore successfully",
+            data: updatedPatient
+        }
+
+    }
 }
