@@ -62,4 +62,28 @@ export class PatientsController {
     ) {
         return this.patientsService.updatePatient(id, updatePatientDto, user)
     }
+
+
+    //Delete Patient
+    @Patch(":id/delete")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    deletePatient(
+        @Param("id") id: string,
+        @GetUser() user: CurrentUser
+    ) {
+        return this.patientsService.deletePatient(id, user);
+    }
+
+    //Restore Patient
+    @Patch(":id/restore")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    restorePatient(
+        @Param("id") id: string,
+        @GetUser() user: CurrentUser
+    ) {
+        return this.patientsService.restorePatient(id, user)
+    }
+
 }
