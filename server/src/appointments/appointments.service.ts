@@ -236,4 +236,43 @@ export class AppointmentsService {
             },
         };
     }
+
+
+    //Get appointment by id
+    async getAppointmentById(id: string) {
+        if(!Types.ObjectId.isValid(id)) {
+            throw new BadRequestException("Invalid Appointment ID")
+        }
+
+        const appointment = await this.appointmentModel
+        .findById(id)
+        .populate({
+            path: "patient",
+            populate: {
+            path: "user",
+            select: "firstName lastName email phone",
+            },
+        })
+        .populate({
+            path: "doctor",
+            populate: {
+            path: "user",
+            select: "firstName lastName email phone",
+            },
+        })
+        .populate("department", "name description")
+        .populate("createdBy", "firstName lastName")
+        .populate("updatedBy", "firstName lastName");
+
+
+        if (!appointment) {
+        throw new BadRequestException("Appointment not found");
+        }
+
+        return {
+        success: true,
+        message: "Appointment fetched successfully",
+        data: appointment,
+        };
+    }
 }

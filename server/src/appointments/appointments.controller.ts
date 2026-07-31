@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -18,7 +18,7 @@ export class AppointmentsController {
         private readonly appointmentsService: AppointmentsService
     ) {}
 
-
+    //Create Appointment
     @Post()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
@@ -30,6 +30,7 @@ export class AppointmentsController {
     }
 
 
+    //Get All Appointments
     @Get()
     @UseGuards(JwtAuthGuard)
     getAllAppointments(
@@ -37,4 +38,21 @@ export class AppointmentsController {
     ) {
         return this.appointmentsService.getAllAppointments(query);
     }
+
+
+    //Get Appointments by id
+    @Get(":id")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    getAppointmentById(
+    @Param("id") id: string,
+    ) {
+        return this.appointmentsService.getAppointmentById(id);
+    }
+
+    //Update Appointment
+
+
+
+
 }
