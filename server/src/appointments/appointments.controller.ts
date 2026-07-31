@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -8,6 +8,7 @@ import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import type { CurrentUser } from 'src/auth/interfaces/current-user.interface';
 import { GetAllAppointmentsDto } from './dto/get-all-appointments.dto';
+import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 
 
 
@@ -51,8 +52,38 @@ export class AppointmentsController {
     }
 
     //Update Appointment
+    @Patch(":id")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    updateAppointment(
+        @Param("id") id: string,
+        @Body() updateAppointmentDto: UpdateAppointmentDto,
+        @GetUser() user: CurrentUser
+    ) {
+        return this.appointmentsService.updateAppointment(id, updateAppointmentDto, user)
+    }
 
 
+    //Delete Appointment
+    @Patch(":id/delete")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    deleteAppointment(
+        @Param("id") id: string,
+        @GetUser() user: CurrentUser
+    ) {
+        return this.appointmentsService.deleteAppointment(id, user)
+    }
 
+    //Restore Appointment
+    @Patch(":id/restore")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    restoreAppointment(
+        @Param("id") id: string,
+        @GetUser() user: CurrentUser
+    ) {
+        return this.appointmentsService.restoreAppointment(id, user)
+    }
 
 }

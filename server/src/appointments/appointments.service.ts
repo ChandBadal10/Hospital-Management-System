@@ -275,4 +275,197 @@ export class AppointmentsService {
         data: appointment,
         };
     }
+
+
+
+
+
+
+
+    //update appointment
+    async updateAppointment(id: string, updateAppointmentDto, user: CurrentUser) {
+        if(!Types.ObjectId.isValid(id)) {
+            throw new BadRequestException("Invalid Appointment ID")
+        }
+
+        const appointment = await this.appointmentModel.findById(id);
+
+        if(!appointment) {
+            throw new BadRequestException("Appointment not found")
+        }
+
+        if(!appointment.isActive) {
+            throw new BadRequestException("Appointment is inActive")
+        }
+
+        if(updateAppointmentDto.doctor) {
+            const doctor = await this.doctorModel.findById(updateAppointmentDto.doctor);
+
+            if(!doctor) {
+                throw new BadRequestException("Doctor not found")
+            }
+
+        }
+
+        if(updateAppointmentDto.department) {
+            const department = await this.departmentModel.findById(updateAppointmentDto.department);
+
+            if(!department) {
+                throw new BadRequestException("Department not found")
+            }
+
+        }
+
+        const doctorId = updateAppointmentDto.doctor ?? appointment.doctor.toString();
+
+        const departmentId =
+        updateAppointmentDto.department ?? appointment.department.toString();
+
+        const appointmentDate =
+        updateAppointmentDto.appointmentDate ?? appointment.appointmentDate;
+
+        const appointmentTime =
+        updateAppointmentDto.appointmentTime ?? appointment.appointmentTime;
+
+
+        const doctor = await this.doctorModel.findById(doctorId);
+
+        if (!doctor) {
+        throw new BadRequestException("Doctor not found");
+        }
+
+
+        if (doctor.departmentId.toString() !== departmentId) {
+        throw new BadRequestException(
+            "Selected doctor does not belong to this department",
+            );
+        }
+
+
+        const existingAppointment = await this.appointmentModel.findOne({
+        _id: { $ne: appointment._id },
+        doctor: doctorId,
+        appointmentDate: appointmentDate,
+        appointmentTime: appointmentTime,
+        status: {
+            $in: [
+            AppointmentStatus.PENDING,
+            AppointmentStatus.CONFIRMED,
+            ],
+            },
+        });
+
+        if (existingAppointment) {
+        throw new BadRequestException(
+        "Doctor already has an appointment at this time",
+        );
+        }
+
+        appointment.doctor = doctor._id;
+        appointment.department = departmentId as any;
+
+        appointment.appointmentDate = appointmentDate;
+        appointment.appointmentTime = appointmentTime;
+
+        appointment.reason =
+        updateAppointmentDto.reason ?? appointment.reason;
+
+        appointment.symptoms =
+        updateAppointmentDto.symptoms ?? appointment.symptoms;
+
+        appointment.notes =
+        updateAppointmentDto.notes ?? appointment.notes;
+
+        appointment.consultationFee = doctor.consultationFee;
+        appointment.updatedBy = new Types.ObjectId(user.id);
+        await appointment.save();
+
+
+        const updatedAppointment = await this.appointmentModel
+        .findById(appointment._id)
+        .populate({
+            path: "patient",
+            populate: {
+            path: "user",
+            select: "firstName lastName email phone",
+            },
+        })
+        .populate({
+            path: "doctor",
+            populate: {
+            path: "user",
+            select: "firstName lastName email phone",
+            },
+        })
+        .populate("department", "name description")
+        .populate("createdBy", "firstName lastName")
+        .populate("updatedBy", "firstName lastName");
+
+
+        return {
+        success: true,
+        message: "Appointment updated successfully",
+        data: updatedAppointment,
+        };
+    }
+
+
+    //Delete Appointment
+    async deleteAppointment(id: string, user: CurrentUser) {
+        if(!Types.ObjectId.isValid(id)) {
+            throw new BadRequestException("Invalid Appointment ID")
+        }
+
+        const appointment = await this.appointmentModel.findById(id);
+
+        if(!appointment) {
+            throw new BadRequestException("Appointment is not found")
+        }
+
+        if(!appointment.isActive) {
+            throw new BadRequestException("Appointment is already deleted")
+        }
+
+        appointment.isActive = false;
+        appointment.updatedBy = new Types.ObjectId(user.id);
+
+
+        await appointment.save();
+
+
+        return {
+            success: true,
+            message: "Appointment deleted successfully"
+        }
+    }
+
+
+    //Restore Appointment
+    async restoreAppointment(id: string, user: CurrentUser) {
+        if(!Types.ObjectId.isValid(id)) {
+            throw new BadRequestException("Invalid Appointment ID")
+        }
+
+        const appointment = await this.appointmentModel.findById(id);
+
+        if(!appointment) {
+            throw new BadRequestException("Appointment is not found")
+        }
+
+        if(appointment.isActive) {
+            throw new BadRequestException("Appointment is active")
+        }
+
+        appointment.isActive = true;
+        appointment.updatedBy = new Types.ObjectId(user.id);
+
+        await appointment.save()
+
+        return {
+            success: true,
+            message: "Appointment successfully Restored"
+        }
+    }
+
+
 }
