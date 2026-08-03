@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { MedicalRecordsService } from './medical-records.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -7,6 +7,7 @@ import { Role } from 'src/users/enums/role.enum';
 import { CreateMedicalRecordDto } from './dto/create-medical-record.dto';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import type { CurrentUser } from 'src/auth/interfaces/current-user.interface';
+import { UpdateMedicalRecordDto } from './dto/update-medical-record.dto';
 
 @Controller('medical-records')
 export class MedicalRecordsController {
@@ -38,5 +39,21 @@ export class MedicalRecordsController {
         @Param("id") id: string
     ) {
         return this.medicalRecordsService.getMedicalRecordById(id);
+    }
+
+    //Update Medical Record
+    @Patch(":id")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    updateMedicalRecord(
+        @Param("id") id: string,
+        @Body() updateMedicalRecordDto: UpdateMedicalRecordDto,
+        @GetUser() user: CurrentUser
+    ) {
+        return this.medicalRecordsService.updateMedicalRecord(
+            id,
+            updateMedicalRecordDto,
+            user
+        )
     }
 }
