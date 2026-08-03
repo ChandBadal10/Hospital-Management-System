@@ -324,6 +324,32 @@ export class MedicalRecordsService {
             }
         }
 
+        //Resotore medical record
+        async restoreMedicalRecord(id: string, user: CurrentUser) {
+            if(!Types.ObjectId.isValid(id)) {
+                throw new BadRequestException("Invalid Id")
+            }
+
+            const medicalRecord = await this.medicalRecordModel.findById(id);
+
+            if(!medicalRecord) {
+                throw new BadRequestException("Medical record not found")
+            }
+
+            if(medicalRecord.isActive) {
+                throw new BadRequestException("Medical record is alreay active")
+            }
+
+            medicalRecord.isActive = true;
+            medicalRecord.updatedBy = new Types.ObjectId(user.id);
+
+            await medicalRecord.save();
+
+            return {
+                success: true,
+                message: "Medical record restore successfully"
+            }
+        }
 
 }
 

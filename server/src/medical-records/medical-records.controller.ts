@@ -67,4 +67,15 @@ export class MedicalRecordsController {
     ) {
         return this.medicalRecordsService.deleteMedicalRecord(id, user)
     }
+
+    //Restore Medical record
+    @Patch(":id/restore")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    restoreMedicalRecord(
+        @Param("id") id: string,
+        @GetUser() user: CurrentUser
+    ) {
+        return this.medicalRecordsService.restoreMedicalRecord(id, user)
+    }
 }
