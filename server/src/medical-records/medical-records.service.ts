@@ -8,6 +8,7 @@ import { Doctor, DoctorDocument } from 'src/doctors/schemas/doctor.schema';
 import { User, UserDocument } from 'src/users/schemas/user.schema';
 import { CreateMedicalRecordDto } from './dto/create-medical-record.dto';
 import { CurrentUser } from 'src/auth/interfaces/current-user.interface';
+import { UpdateMedicalRecordDto } from './dto/update-medical-record.dto';
 
 @Injectable()
 export class MedicalRecordsService {
@@ -245,6 +246,62 @@ export class MedicalRecordsService {
 
 
     //Update the Medical Record
+    async updateMedicalRecord(
+        id: string,
+        updateMedicalRecordDto: UpdateMedicalRecordDto,
+        user: CurrentUser
+    ) {
+        if(!Types.ObjectId.isValid(id)) {
+            throw new BadRequestException("Invalid Medical record ID")
+        }
+
+        const medicalRecord = await this.medicalRecordModel.findById(id);
+
+        if(!medicalRecord || !medicalRecord.isActive) {
+            throw new BadRequestException("Medical record not found")
+        }
+
+        const updateMedicalRecord = await this.medicalRecordModel.findByIdAndUpdate(id, {
+            ...updateMedicalRecordDto,
+            updatedBy: new Types.ObjectId(user.id),
+        }, {
+            returnDocument: "after"
+        },
+        )
+        .populate({
+            path: "appointment",
+            })
+            .populate({
+            path: "patient",
+            populate: {
+                path: "user",
+                select: "firstName lastName email phone",
+            },
+            })
+            .populate({
+            path: "doctor",
+            populate: {
+                path: "user",
+                select: "firstName lastName email phone",
+            },
+            })
+            .populate({
+            path: "createdBy",
+            select: "firstName lastName",
+            })
+            .populate({
+            path: "updatedBy",
+            select: "firstName lastName",
+            });
+
+        return {
+            success: true,
+            message: "Medical record updated successfully",
+            data: updateMedicalRecord,
+        };
+        }
+
+        //Soft delete
 
 
 
