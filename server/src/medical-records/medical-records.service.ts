@@ -90,20 +90,20 @@ export class MedicalRecordsService {
 
         //create Record
        const medicalRecord = await this.medicalRecordModel.create({
-  appointment: new Types.ObjectId(createMedicalRecordDto.appointment),
-  patient: new Types.ObjectId(createMedicalRecordDto.patient),
-  doctor: new Types.ObjectId(createMedicalRecordDto.doctor),
+        appointment: new Types.ObjectId(createMedicalRecordDto.appointment),
+        patient: new Types.ObjectId(createMedicalRecordDto.patient),
+        doctor: new Types.ObjectId(createMedicalRecordDto.doctor),
 
-  diagnosis: createMedicalRecordDto.diagnosis,
-  treatment: createMedicalRecordDto.treatment,
-  prescription: createMedicalRecordDto.prescription,
-  doctorNotes: createMedicalRecordDto.doctorNotes,
-  followUpDate: createMedicalRecordDto.followUpDate,
-  vitalSigns: createMedicalRecordDto.vitalSigns,
+        diagnosis: createMedicalRecordDto.diagnosis,
+        treatment: createMedicalRecordDto.treatment,
+        prescription: createMedicalRecordDto.prescription,
+        doctorNotes: createMedicalRecordDto.doctorNotes,
+        followUpDate: createMedicalRecordDto.followUpDate,
+        vitalSigns: createMedicalRecordDto.vitalSigns,
 
-  createdBy: new Types.ObjectId(user.id),
-  updatedBy: new Types.ObjectId(user.id),
-});
+        createdBy: new Types.ObjectId(user.id),
+        updatedBy: new Types.ObjectId(user.id),
+        });
 
         const populatedMedicalRecord =
             await this.medicalRecordModel
@@ -148,4 +148,106 @@ export class MedicalRecordsService {
     }
 
 
+    //get all records
+    async getAllMedicalRecords() {
+        const medicalRecords = await this.medicalRecordModel.find({ isActive: true })
+        .populate({
+            path: "appointment"
+        })
+
+        .populate({
+      path: "patient",
+      populate: {
+        path: "user",
+        select: "firstName lastName email phone",
+      },
+    })
+
+    .populate({
+      path: "doctor",
+      populate: {
+        path: "user",
+        select: "firstName lastName email phone",
+      },
+    })
+
+    .populate({
+      path: "createdBy",
+      select: "firstName lastName",
+    })
+
+    .populate({
+      path: "updatedBy",
+      select: "firstName lastName",
+    })
+
+    .sort({ createdAt: -1 });
+
+  return {
+    success: true,
+    message: "Medical records fetched successfully",
+    data: medicalRecords,
+  };
+
+
+
 }
+
+
+    //Get medical record by id
+
+    async getMedicalRecordById(id: string) {
+        if(!Types.ObjectId.isValid(id)) {
+            throw new BadRequestException("Invalid Medical Record ID");
+        }
+
+        const medicalRecord = await this.medicalRecordModel.findById(id)
+        .populate({
+            path: "appointment"
+        })
+
+        .populate({
+            path: "patient",
+            populate: {
+                path: "user",
+                select: "firstName lastName email phone"
+            },
+        })
+
+        .populate({
+            path: "doctor",
+            populate: {
+                path: "user",
+                select: "firstName lastName email phone"
+            }
+        })
+
+        .populate({
+            path: "createdBy",
+            select: "firstName lastName"
+        })
+
+        .populate({
+            path: "updatedBy",
+            select:"firstName lastName"
+        });
+
+        if(!medicalRecord || !medicalRecord.isActive) {
+            throw new BadRequestException("Medical record not found")
+        }
+
+        return {
+            success: true,
+            message: `Medical record fetched successfully for the id: ${id} `,
+            data: medicalRecord
+        }
+    }
+
+
+    //Update the Medical Record
+
+
+
+}
+
+

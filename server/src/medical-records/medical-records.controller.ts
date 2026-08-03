@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { MedicalRecordsService } from './medical-records.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -23,5 +23,20 @@ export class MedicalRecordsController {
         @GetUser() user: CurrentUser
     ) {
         return this.medicalRecordsService.createMedicalRecord(createMedicalRecordDto, user)
+    }
+
+
+    @Get()
+    @UseGuards(JwtAuthGuard)
+    getAllMedicalRecords(){
+        return this.medicalRecordsService.getAllMedicalRecords();
+    }
+
+    @Get(":id")
+    @UseGuards(JwtAuthGuard)
+    getMedicalRecordById(
+        @Param("id") id: string
+    ) {
+        return this.medicalRecordsService.getMedicalRecordById(id);
     }
 }
