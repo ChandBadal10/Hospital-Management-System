@@ -302,7 +302,27 @@ export class MedicalRecordsService {
         }
 
         //Soft delete
+        async deleteMedicalRecord(id: string, user: CurrentUser) {
+            if(!Types.ObjectId.isValid(id)) {
+                throw new BadRequestException("Invalid Medical Record ID");
+            }
 
+            const medicalRecord = await this.medicalRecordModel.findById(id);
+
+            if(!medicalRecord || !medicalRecord.isActive) {
+                throw new BadRequestException("Medical record not found")
+            }
+
+            medicalRecord.isActive = false;
+            medicalRecord.updatedBy = new Types.ObjectId(user.id);
+
+            await medicalRecord.save();
+
+            return {
+                success: true,
+                message: "Successfully Deleted the Medical Record"
+            }
+        }
 
 
 }
