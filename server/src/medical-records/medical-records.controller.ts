@@ -56,4 +56,15 @@ export class MedicalRecordsController {
             user
         )
     }
+
+    //Delte medical record
+    @Patch(":id/delete")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    deletedMedicalRecord(
+        @Param("id") id: string,
+        @GetUser() user: CurrentUser
+    ) {
+        return this.medicalRecordsService.deleteMedicalRecord(id, user)
+    }
 }
