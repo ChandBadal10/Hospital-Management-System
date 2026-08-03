@@ -35,9 +35,8 @@ export class AppointmentsController {
     @Get()
     @UseGuards(JwtAuthGuard)
     getAllAppointments(
-        @Query() query: GetAllAppointmentsDto,
     ) {
-        return this.appointmentsService.getAllAppointments(query);
+        return this.appointmentsService.getAllAppointments();
     }
 
 

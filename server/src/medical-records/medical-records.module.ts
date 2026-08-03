@@ -4,7 +4,7 @@ import { MedicalRecordsService } from './medical-records.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MedicalRecord, MedicalRecordSchema } from './schemas/medical-record.schema';
 import { User, UserSchema } from 'src/users/schemas/user.schema';
-import { Appoinment, AppointmentSchema } from 'src/appointments/schemas/appointment.schema';
+import { Appointment, AppointmentSchema } from 'src/appointments/schemas/appointment.schema';
 import { Doctor, DoctorSchema } from 'src/doctors/schemas/doctor.schema';
 import { Patient, PatientSchema } from 'src/patients/schemas/patient.schema';
 
@@ -20,7 +20,7 @@ import { Patient, PatientSchema } from 'src/patients/schemas/patient.schema';
         schema: UserSchema
       },
       {
-        name: Appoinment.name,
+        name: Appointment.name,
         schema: AppointmentSchema
       },
 

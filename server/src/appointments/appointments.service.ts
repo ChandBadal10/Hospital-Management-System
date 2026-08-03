@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Appoinment, AppointmentDocument } from './schemas/appointment.schema';
+import { Appointment, AppointmentDocument } from './schemas/appointment.schema';
 import { Model, Types } from 'mongoose';
 import { Department, DepartmentDocument } from 'src/departments/schemas/department.schema';
 import { Doctor, DoctorDocument } from 'src/doctors/schemas/doctor.schema';
@@ -14,7 +14,7 @@ import { GetAllAppointmentsDto } from './dto/get-all-appointments.dto';
 @Injectable()
 export class AppointmentsService {
     constructor(
-        @InjectModel(Appoinment.name)
+        @InjectModel(Appointment.name)
         private readonly appointmentModel: Model<AppointmentDocument>,
 
         @InjectModel(Department.name)
@@ -155,87 +155,35 @@ export class AppointmentsService {
     }
 
 
-    //Get All Appointments
-    async getAllAppointments(query: GetAllAppointmentsDto) {
-        const page = Number(query.page) || 1;
-        const limit = Number(query.limit) || 10;
-
-        const skip = (page - 1 ) * limit;
-
-
-        const filter: any = {
-            isActive: true,
-        };
-
-        if (query.doctor) {
-        filter.doctor = query.doctor;
-        }
-
-        if (query.patient) {
-        filter.patient = query.patient;
-        }
-
-        if (query.department) {
-        filter.department = query.department;
-        }
-
-        if (query.status) {
-        filter.status = query.status;
-        }
-
-        if (query.paymentStatus) {
-        filter.paymentStatus = query.paymentStatus;
-        }
-
-        if (query.appointmentDate) {
-        const startDate = new Date(query.appointmentDate);
-        const endDate = new Date(query.appointmentDate);
-
-        endDate.setHours(23, 59, 59, 999);
-
-        filter.appointmentDate = {
-            $gte: startDate,
-            $lte: endDate,
-        };
-        }
-
-        const total = await this.appointmentModel.countDocuments(filter);
-
-        const appointments = await this.appointmentModel
-        .find(filter)
+//Get All Appointments
+async getAllAppointments() {
+    const appointments = await this.appointmentModel
+        .find({ isActive: true })
         .populate({
             path: "patient",
             populate: {
-            path: "user",
-            select: "firstName lastName email phone",
+                path: "user",
+                select: "firstName lastName email phone",
             },
         })
         .populate({
             path: "doctor",
             populate: {
-            path: "user",
-            select: "firstName lastName email phone",
+                path: "user",
+                select: "firstName lastName email phone",
             },
         })
         .populate("department", "name description")
         .populate("createdBy", "firstName lastName")
         .populate("updatedBy", "firstName lastName")
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit);
+        .sort({ createdAt: -1 });
 
-        return {
-            success: true,
-            message: "Appointments fetched successfully",
-            data: appointments,
-            pagination: {
-            total,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit),
-            },
-        };
-    }
+    return {
+        success: true,
+        message: "Appointments fetched successfully",
+        data: appointments,
+    };
+}
 
 
     //Get appointment by id

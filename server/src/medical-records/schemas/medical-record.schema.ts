@@ -41,10 +41,10 @@ export class MedicalRecord {
   treatment!: string;
 
   @Prop({
-    trim: true,
-    default: "",
-  })
-  prescription!: string;
+  type: [String],
+  default: [],
+})
+prescription!: string[];
 
   @Prop({
     trim: true,

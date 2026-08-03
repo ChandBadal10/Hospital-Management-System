@@ -9,7 +9,7 @@ import { User } from "src/users/schemas/user.schema";
 
 
 
-export type AppointmentDocument = HydratedDocument<Appoinment>;
+export type AppointmentDocument = HydratedDocument<Appointment>;
 
 
 @Schema({
@@ -17,7 +17,7 @@ export type AppointmentDocument = HydratedDocument<Appoinment>;
 })
 
 
-export class Appoinment{
+export class Appointment{
     @Prop({
         type: Types.ObjectId,
         ref: Patient.name,
@@ -104,4 +104,4 @@ export class Appoinment{
     updatedBy!: Types.ObjectId;
 }
 
-export const AppointmentSchema = SchemaFactory.createForClass(Appoinment);
+export const AppointmentSchema = SchemaFactory.createForClass(Appointment);
