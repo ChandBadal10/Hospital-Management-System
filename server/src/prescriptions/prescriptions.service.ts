@@ -376,4 +376,31 @@ export class PrescriptionsService {
             message: "Prescription deleted successfully"
         }
     }
+
+
+    //Restore Prescription
+    async restorePrescription(id: string, user: CurrentUser) {
+        if(!Types.ObjectId.isValid(id)) {
+            throw new BadRequestException("Invalid Prescription ID")
+        }
+
+        const prescription = await this.prescriptionModel.findById(id);
+
+        if(!prescription) {
+            throw new BadRequestException("Prescription not found");
+        }
+
+        if(prescription.isActive) {
+            throw new BadRequestException("Prescription is already Active")
+        }
+
+        prescription.isActive = true;
+        prescription.updatedBy = new Types.ObjectId(user.id);
+        await prescription.save();
+
+        return {
+            success: true,
+            message: "Restore Successfully"
+        }
+    }
 }
