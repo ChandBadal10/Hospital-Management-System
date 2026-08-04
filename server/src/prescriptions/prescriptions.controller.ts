@@ -55,4 +55,15 @@ export class PrescriptionsController {
     ) {
         return this.prescriptionsService.updatePrescription(id, updatePrescriptionDto, user)
     }
+
+    //Delete Prescription
+    @Patch(":id/delete")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    deletePrescription(
+        @Param("id") id: string,
+        @GetUser() user: CurrentUser
+    ) {
+        return this.prescriptionsService.deletePrescription(id, user);
+    }
 }
