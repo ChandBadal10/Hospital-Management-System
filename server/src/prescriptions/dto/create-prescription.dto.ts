@@ -38,6 +38,9 @@ patient!: string;
 @IsMongoId()
 doctor!: string;
 
+@IsMongoId()
+appointment!: string;
+
 @IsArray()
 @ValidateNested({ each: true })
 @Type(() => MedicineDto)
