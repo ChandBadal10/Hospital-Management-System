@@ -10,6 +10,7 @@ import { DoctorsModule } from './doctors/doctors.module';
 import { PatientsModule } from './patients/patients.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { MedicalRecordsModule } from './medical-records/medical-records.module';
+import { PrescriptionsModule } from './prescriptions/prescriptions.module';
 
 
 @Module({
@@ -27,7 +28,8 @@ import { MedicalRecordsModule } from './medical-records/medical-records.module';
     DoctorsModule,
     PatientsModule,
     AppointmentsModule,
-    MedicalRecordsModule
+    MedicalRecordsModule,
+    PrescriptionsModule
   ],
 })
 export class AppModule {}
