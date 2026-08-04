@@ -33,6 +33,14 @@ export class Prescription {
   })
   doctor!: Types.ObjectId;
 
+
+  @Prop({
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Appointment",
+  required: true,
+  })
+  appointment!: Types.ObjectId;
+
   @Prop({
     required: true,
   })
