@@ -7,7 +7,6 @@ import { Patient, PatientDocument } from 'src/patients/schemas/patient.schema';
 import { Doctor, DoctorDocument } from 'src/doctors/schemas/doctor.schema';
 import { Appointment, AppointmentDocument } from 'src/appointments/schemas/appointment.schema';
 import { User, UserDocument } from 'src/users/schemas/user.schema';
-import { CreateAppointmentDto } from 'src/appointments/dto/create-appointment.dto';
 import { CurrentUser } from 'src/auth/interfaces/current-user.interface';
 import { CreatePrescriptionDto } from './dto/create-prescription.dto';
 
@@ -162,7 +161,52 @@ export class PrescriptionsService {
                 message: "Prescription created successfully",
                 data: populatedPrescription
             }
+    }
 
 
+    //Get All Prescription
+    async getAllPrescriptions() {
+        const prescriptions = await this.prescriptionModel.find({ isActive: true })
+         .populate({
+            path: "medicalRecord",
+            })
+
+            .populate({
+            path: "appointment",
+            })
+
+            .populate({
+            path: "patient",
+            populate: {
+                path: "user",
+                select: "firstName lastName email phone",
+            },
+            })
+
+            .populate({
+            path: "doctor",
+            populate: {
+                path: "user",
+                select: "firstName lastName email phone",
+            },
+            })
+
+            .populate({
+            path: "createdBy",
+            select: "firstName lastName",
+            })
+
+            .populate({
+            path: "updatedBy",
+            select: "firstName lastName",
+            })
+
+            .sort({ createdAt: -1 });
+
+            return {
+                success: true,
+                message: "Prescription fetched successfully",
+                data: prescriptions
+            }
     }
 }
