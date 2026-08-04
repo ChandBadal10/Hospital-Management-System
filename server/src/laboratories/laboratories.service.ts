@@ -5,6 +5,7 @@ import { Model, Types } from 'mongoose';
 import { User, UserDocument } from 'src/users/schemas/user.schema';
 import { CreateLaboratoryDto } from './dto/create-laboratory.dto';
 import { CurrentUser } from 'src/auth/interfaces/current-user.interface';
+import { UpdateLaboratoryDto } from './dto/update-laboratory.dto';
 
 @Injectable()
 export class LaboratoriesService {
@@ -77,6 +78,84 @@ export class LaboratoriesService {
     }
 
 
+    //Update
+    async updateLaboratory(id: string, updateLaboratoryDto: UpdateLaboratoryDto, user: CurrentUser) {
+        const laboratory = await this.laboratoryModel.findOne({_id: id, isActive: true});
 
+        if(!laboratory) {
+            throw new NotFoundException("Laboratory not found")
+        }
+
+        if(updateLaboratoryDto.name && updateLaboratoryDto.name !== laboratory.name) {
+            const existingLaboratory = await this.laboratoryModel.findOne({
+                name: updateLaboratoryDto.name,
+                isActive: true
+            });
+
+            if(existingLaboratory) {
+                throw new BadRequestException("Laboratory already exists");
+            }
+        }
+        Object.assign(laboratory, updateLaboratoryDto);
+        laboratory.updatedBy = new Types.ObjectId(user.id);
+
+        await laboratory.save();
+
+        await laboratory.save();
+
+        const updatedLaboratory = await this.laboratoryModel
+            .findById(laboratory._id)
+            .populate("createdBy", "firstName lastName")
+            .populate("updatedBy", "firstName lastName");
+
+        return {
+            success: true,
+            message: "Laboratory updated successfully",
+            data: updatedLaboratory,
+        };
+
+    }
+
+
+    //soft delete
+    async deleteLaboratory(id: string, user: CurrentUser) {
+        const laboratory = await this.laboratoryModel.findOne({_id: id, isActive: true});
+
+        if(!laboratory) {
+            throw new BadRequestException("Laboratory not found")
+        }
+
+        laboratory.isActive = false;
+        laboratory.updatedBy = new Types.ObjectId(user.id);
+
+        await laboratory.save();
+
+        return {
+            success: true,
+            message: "Laboratory deleted successfully"
+        }
+    }
+
+    //restore
+    async restoreLaboratory(id: string, user: CurrentUser) {
+        const laboratory = await this.laboratoryModel.findById(id);
+        if(!laboratory) {
+            throw new NotFoundException("Laboratory not found")
+        }
+
+        if(laboratory.isActive) {
+            throw new BadRequestException("Laboratory already active")
+        }
+
+        laboratory.isActive = true;
+        laboratory.updatedBy = new Types.ObjectId(user.id);
+
+        await laboratory.save();
+
+        return {
+            success: true,
+            message: "Laboratory restore successfully"
+        }
+    }
 
 }
