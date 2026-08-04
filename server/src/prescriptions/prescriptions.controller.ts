@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { PrescriptionsService } from './prescriptions.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -14,6 +14,7 @@ export class PrescriptionsController {
         private readonly prescriptionsService: PrescriptionsService,
     ) {}
 
+    //Create Prescription
     @Post()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
@@ -22,5 +23,13 @@ export class PrescriptionsController {
         @GetUser() user: CurrentUser
     ) {
         return this.prescriptionsService.createPrescription(createPrescriptionDto, user)
+    }
+
+    // Get All Prescription
+    @Get()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    getAllPrescription() {
+        return this.prescriptionsService.getAllPrescriptions();
     }
 }
