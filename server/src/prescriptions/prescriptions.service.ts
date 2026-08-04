@@ -9,6 +9,7 @@ import { Appointment, AppointmentDocument } from 'src/appointments/schemas/appoi
 import { User, UserDocument } from 'src/users/schemas/user.schema';
 import { CurrentUser } from 'src/auth/interfaces/current-user.interface';
 import { CreatePrescriptionDto } from './dto/create-prescription.dto';
+import { UpdatePrescriptionDto } from './dto/update-prescription.dto';
 
 @Injectable()
 export class PrescriptionsService {
@@ -262,7 +263,93 @@ export class PrescriptionsService {
             message: "Prescription fetched successfully",
             data: prescription
         }
+    }
 
+    //Update Prescription
+    async updatePrescription(id: string, updatePrescriptionDto: UpdatePrescriptionDto, user: CurrentUser) {
+        //Validate id
+        if(!Types.ObjectId.isValid(id)){
+            throw new BadRequestException("Invalid Prescription ID");
+        }
+
+        //Find Prescription
+        const prescription = await this.prescriptionModel.findOne({_id: id, isActive: true});
+
+        if(!prescription) {
+            throw new BadRequestException("Prescription not found")
+        }
+
+        // If Medical Record is Changing
+        if(updatePrescriptionDto.medicalRecord) {
+            if(!Types.ObjectId.isValid(updatePrescriptionDto.medicalRecord)) {
+                throw new BadRequestException("Invalid Medical Record Id");
+            }
+
+            const medicalRecord = await this.medicalRecordModel.findById(updatePrescriptionDto.medicalRecord);
+
+            if(!medicalRecord) {
+                throw new BadRequestException("Medical Record not found");
+            }
+        }
+
+        //If Patient is Changing
+        if(updatePrescriptionDto.patient) {
+            if(!Types.ObjectId.isValid(updatePrescriptionDto.patient)) {
+                throw new BadRequestException("Invalid Patient ID");
+            }
+
+            const patient = await this.patientModel.findById(updatePrescriptionDto.patient);
+
+            if(!patient) {
+                throw new BadRequestException("Patient not found");
+            }
+        }
+
+        //If Doctor is changing
+
+        if(updatePrescriptionDto.doctor) {
+            if(!Types.ObjectId.isValid(updatePrescriptionDto.doctor)) {
+                throw new BadRequestException("Invalid Doctor ID");
+            }
+
+            const doctor = await this.doctorModel.findById(updatePrescriptionDto.doctor);
+
+            if(!doctor) {
+                throw new BadRequestException("Doctor not found")
+            }
+        }
+
+        //Update
+        const updatePrescription = await this.prescriptionModel.findByIdAndUpdate(id, {
+            ...updatePrescriptionDto,
+            updatedBy: new Types.ObjectId(user.id)
+        }, {
+            new: true
+        })
+            .populate("medicalRecord")
+            .populate("appointment")
+            .populate({
+            path: "patient",
+            populate: {
+                path: "user",
+                select: "firstName lastName email phone",
+            },
+            })
+            .populate({
+            path: "doctor",
+            populate: {
+                path: "user",
+                select: "firstName lastName email phone",
+            },
+            })
+            .populate("createdBy", "firstName lastName")
+            .populate("updatedBy", "firstName lastName");
+
+            return {
+                success: true,
+                message: "Prescription updated successfully",
+                data: updatePrescription
+            }
 
     }
 }
