@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { PrescriptionsService } from './prescriptions.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -7,6 +7,7 @@ import { Role } from 'src/users/enums/role.enum';
 import { CreatePrescriptionDto } from './dto/create-prescription.dto';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import type { CurrentUser } from 'src/auth/interfaces/current-user.interface';
+import { UpdatePrescriptionDto } from './dto/update-prescription.dto';
 
 @Controller('prescriptions')
 export class PrescriptionsController {
@@ -41,5 +42,17 @@ export class PrescriptionsController {
         @Param("id") id: string
     ) {
         return this.prescriptionsService.getPrescriptionById(id);
+    }
+
+    //Update Prescription
+    @Patch(":id")
+    @UseGuards(JwtAuthGuard, UseGuards)
+    @Roles(Role.ADMIN)
+    updatePrescription(
+        @Param("id") id: string,
+        @Body() updatePrescriptionDto: UpdatePrescriptionDto,
+        @GetUser() user: CurrentUser
+    ) {
+        return this.prescriptionsService.updatePrescription(id, updatePrescriptionDto, user)
     }
 }
