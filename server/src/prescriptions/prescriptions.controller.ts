@@ -66,4 +66,15 @@ export class PrescriptionsController {
     ) {
         return this.prescriptionsService.deletePrescription(id, user);
     }
+
+    //Restore Prescription
+    @Patch(":id/restore")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    restorePrescription(
+        @Param("id") id: string,
+        @GetUser() user: CurrentUser
+    ) {
+        return this.prescriptionsService.restorePrescription(id, user);
+    }
 }
