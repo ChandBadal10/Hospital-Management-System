@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { PrescriptionsService } from './prescriptions.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -31,5 +31,15 @@ export class PrescriptionsController {
     @Roles(Role.ADMIN)
     getAllPrescription() {
         return this.prescriptionsService.getAllPrescriptions();
+    }
+
+    //Ger prescription by id
+    @Get(":id")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    getPrescriptionById(
+        @Param("id") id: string
+    ) {
+        return this.prescriptionsService.getPrescriptionById(id);
     }
 }

@@ -209,4 +209,60 @@ export class PrescriptionsService {
                 data: prescriptions
             }
     }
+
+    //Get Prescription By Id
+    async getPrescriptionById(id: string) {
+        //Validate MongoDB ID
+        if(!Types.ObjectId.isValid(id)) {
+            throw new BadRequestException("Invalid Prescription ID");
+        }
+
+        //Find Prescription
+        const prescription = await this.prescriptionModel.findOne({_id: id, isActive: true})
+         .populate({
+            path: "medicalRecord",
+        })
+
+        .populate({
+            path: "appointment",
+        })
+
+        .populate({
+            path: "patient",
+            populate: {
+                path: "user",
+                select: "firstName lastName email phone",
+            },
+        })
+
+        .populate({
+            path: "doctor",
+            populate: {
+                path: "user",
+                select: "firstName lastName email phone",
+            },
+        })
+
+        .populate({
+            path: "createdBy",
+            select: "firstName lastName",
+        })
+
+        .populate({
+            path: "updatedBy",
+            select: "firstName lastName",
+        });
+
+        if(!prescription) {
+            throw new BadRequestException("Prescription not found");
+        }
+
+        return {
+            success: true,
+            message: "Prescription fetched successfully",
+            data: prescription
+        }
+
+
+    }
 }
