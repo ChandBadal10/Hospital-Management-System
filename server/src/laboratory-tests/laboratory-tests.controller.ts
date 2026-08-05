@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { LaboratoryTestsService } from './laboratory-tests.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -22,5 +22,20 @@ export class LaboratoryTestsController {
         @GetUser() user: CurrentUser
     ) {
         return this.laboratoryTestsService.createLaboratoryTest(createLaboratoryTestDto, user)
+    }
+
+    //get all laboratory test
+    @Get()
+    async getAllLaboratoryTest() {
+        return this.laboratoryTestsService.getAllLaboratoryTest();
+    }
+
+
+    //Get by id
+    @Get(":id")
+    async getLaboratoryTestById(
+        @Param("id") id: string
+    ) {
+        return this.laboratoryTestsService.getLaboratoryTestById(id);
     }
 }
