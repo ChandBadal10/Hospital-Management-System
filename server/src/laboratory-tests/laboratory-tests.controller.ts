@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { LaboratoryTestsService } from './laboratory-tests.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -7,6 +7,7 @@ import { Role } from 'src/users/enums/role.enum';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import type { CurrentUser } from 'src/auth/interfaces/current-user.interface';
 import { CreateLaboratoryTestDto } from './dto/create-laboratory-test.dto';
+import { UpdateLaboratoryTestDto } from './dto/update-laboratory-test.dto';
 
 @Controller('laboratory-tests')
 export class LaboratoryTestsController {
@@ -37,5 +38,43 @@ export class LaboratoryTestsController {
         @Param("id") id: string
     ) {
         return this.laboratoryTestsService.getLaboratoryTestById(id);
+    }
+
+    //Update
+    @Patch(":id")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    updateLaboratoryTest(
+        @Param("id") id: string,
+        @Body() updateLaboratoryTestDto: UpdateLaboratoryTestDto,
+        @GetUser() user: CurrentUser
+    ) {
+        return this.laboratoryTestsService.updateLaboratoryTest(
+            id,
+            updateLaboratoryTestDto,
+            user
+        )
+    }
+
+    //Soft delete
+    @Patch(":id/delete")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    deleteLaboratoryTest(
+        @Param("id") id: string,
+        @GetUser() user: CurrentUser
+    ) {
+        return this.laboratoryTestsService.deleteLaboratoryTest(id, user)
+    }
+
+    //restore
+    @Patch(":id/restore")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    restoreLaboratoryTest(
+        @Param("id") id: string,
+        @GetUser() user: CurrentUser
+    ) {
+        return this.laboratoryTestsService.restoreLaboratoryTest(id, user);
     }
 }
