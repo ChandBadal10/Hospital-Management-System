@@ -13,6 +13,7 @@ import { MedicalRecordsModule } from './medical-records/medical-records.module';
 import { PrescriptionsModule } from './prescriptions/prescriptions.module';
 import { LaboratoriesModule } from './laboratories/laboratories.module';
 import { LaboratoryTestsModule } from './laboratory-tests/laboratory-tests.module';
+import { LaboratoryOrdersModule } from './laboratory-orders/laboratory-orders.module';
 
 
 @Module({
@@ -33,7 +34,8 @@ import { LaboratoryTestsModule } from './laboratory-tests/laboratory-tests.modul
     MedicalRecordsModule,
     PrescriptionsModule,
     LaboratoriesModule,
-    LaboratoryTestsModule
+    LaboratoryTestsModule,
+    LaboratoryOrdersModule
   ],
 })
 export class AppModule {}
