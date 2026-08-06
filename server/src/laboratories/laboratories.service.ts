@@ -101,8 +101,6 @@ export class LaboratoriesService {
 
         await laboratory.save();
 
-        await laboratory.save();
-
         const updatedLaboratory = await this.laboratoryModel
             .findById(laboratory._id)
             .populate("createdBy", "firstName lastName")
