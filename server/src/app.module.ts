@@ -14,6 +14,7 @@ import { PrescriptionsModule } from './prescriptions/prescriptions.module';
 import { LaboratoriesModule } from './laboratories/laboratories.module';
 import { LaboratoryTestsModule } from './laboratory-tests/laboratory-tests.module';
 import { LaboratoryOrdersModule } from './laboratory-orders/laboratory-orders.module';
+import { LaboratoryResultModule } from './laboratory-result/laboratory-result.module';
 
 
 @Module({
@@ -35,7 +36,8 @@ import { LaboratoryOrdersModule } from './laboratory-orders/laboratory-orders.mo
     PrescriptionsModule,
     LaboratoriesModule,
     LaboratoryTestsModule,
-    LaboratoryOrdersModule
+    LaboratoryOrdersModule,
+    LaboratoryResultModule
   ],
 })
 export class AppModule {}
