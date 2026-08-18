@@ -3,11 +3,11 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "@/src/context/AuthContext";
+import { Role } from "@/src/types/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Role } from "@/src/types/auth";
 import {
   Card,
   CardHeader,
@@ -17,9 +17,8 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 
-
 export default function LoginPage() {
-  const { login, user } = useAuth();
+  const { login } = useAuth();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -28,28 +27,29 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
-  e.preventDefault();
-  setError(null);
-  setSubmitting(true);
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
 
-  // login() now returns { error, role } — see AuthContext.tsx.
-  // We use the returned role directly (not context state) to
-  // avoid redirecting before the state update has propagated.
-  const result = await login({ email, password });
+    // login() returns { error, role }:
+    //   - error is a string message on failure, or null on success
+    //   - role is only present on success, used to redirect immediately
+    //     without waiting on context state to re-render (see AuthContext.tsx)
+    const result = await login({ email, password });
 
-  setSubmitting(false);
+    setSubmitting(false);
 
-  if (result.error) {
-    setError(result.error);
-    return;
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+
+    if (result.role === Role.ADMIN) {
+      router.push("/admin");
+    } else {
+      router.push("/dashboard");
+    }
   }
-
-  if (result.role === Role.ADMIN) {
-    router.push("/admin");
-  } else {
-    router.push("/dashboard");
-  }
-}
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
