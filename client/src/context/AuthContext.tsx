@@ -30,7 +30,7 @@ interface AuthContextValue {
   // Returns an error message string on failure, or null on success.
   // We return a string instead of throwing so the login page can
   // show the message inline without a try/catch.
-  login: (payload: LoginPayload) => Promise<string | null>;
+  login: (payload: LoginPayload) => Promise<{ error: string | null; role?: CurrentUser["role"] }>;
   register: (payload: RegisterPayload) => Promise<string | null>;
   logout: () => Promise<void>;
 }
@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // auth.service.ts login()). So we check `success` in the body,
   // not the HTTP status.
   // ───────────────────────────────────────────────────────
-  async function login(payload: LoginPayload): Promise<string | null> {
+    async function login(payload: LoginPayload) {
     try {
       const res = await api.post<ApiResponse<LoginResponseData>>(
         "/auth/login",
@@ -95,16 +95,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
 
       if (!res.data.success) {
-        return res.data.message || "Login failed";
+        return { error: res.data.message || "Login failed" };
       }
 
       const { accessToken, refreshToken, user: loggedInUser } = res.data.data;
       saveAuthSession(accessToken, refreshToken, loggedInUser);
       setUser(loggedInUser as CurrentUser);
 
-      return null; // null = success, no error message
+      // Return the role directly — don't rely on the `user` state
+      // variable being updated in the caller yet.
+      return { error: null, role: loggedInUser.role };
     } catch (err) {
-      return extractErrorMessage(err, "Something went wrong during login");
+      return { error: extractErrorMessage(err, "Something went wrong during login") };
     }
   }
 
