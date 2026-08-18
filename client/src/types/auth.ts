@@ -1,6 +1,3 @@
-
-// Matches: server/src/users/enums/role.enum.ts
-
 export enum Role {
   ADMIN = "ADMIN",
   DOCTOR = "DOCTOR",
@@ -11,9 +8,9 @@ export enum Role {
   PATIENT = "PATIENT",
 }
 
-
-// Matches: server/src/auth/interfaces/current-user.interface.ts
-// This is what GET /auth/profile returns as `data`
+// ─────────────────────────────────────────────
+// USER
+// ─────────────────────────────────────────────
 
 export interface CurrentUser {
   id: string;
@@ -23,53 +20,45 @@ export interface CurrentUser {
   role: Role;
 }
 
+// ─────────────────────────────────────────────
+// REQUEST PAYLOADS
+// ─────────────────────────────────────────────
 
-// Request payloads — match the backend DTOs field-for-field
-
-
-// Matches: server/src/auth/dto/register.ts
 export interface RegisterPayload {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
   phone: string;
-  // role is optional on the backend but defaults to PATIENT —
-  // we won't send it from the public register form
 }
 
-// Matches: server/src/auth/dto/login.dto.ts
 export interface LoginPayload {
   email: string;
   password: string;
 }
 
-// Matches: server/src/auth/dto/forgot-password.dto.ts
 export interface ForgotPasswordPayload {
   email: string;
 }
 
-// Matches: server/src/auth/dto/verify-otp.dto.ts
 export interface VerifyOtpPayload {
   email: string;
   otp: string;
 }
 
-// Matches: server/src/auth/dto/reset-password.dto.ts
 export interface ResetPasswordPayload {
   email: string;
   newPassword: string;
 }
 
+// ─────────────────────────────────────────────
+// API RESPONSE
+// ─────────────────────────────────────────────
 
-// Response shapes — every endpoint in your backend returns
-// { success, message, data } or { success, message, error }
-
-
-export interface ApiSuccess<T> {
+export interface ApiSuccess<T = null> {
   success: true;
   message: string;
-  data: T;
+  data?: T;
 }
 
 export interface ApiFailure {
@@ -78,12 +67,18 @@ export interface ApiFailure {
   error?: string;
 }
 
-export type ApiResponse<T> = ApiSuccess<T> | ApiFailure;
+export type ApiResponse<T = null> =
+  | ApiSuccess<T>
+  | ApiFailure;
 
-// Matches the `data` object inside POST /auth/login's response
+// ─────────────────────────────────────────────
+// LOGIN
+// ─────────────────────────────────────────────
+
 export interface LoginResponseData {
   accessToken: string;
   refreshToken: string;
+
   user: {
     id: string;
     firstName: string;
@@ -93,13 +88,19 @@ export interface LoginResponseData {
   };
 }
 
-// Matches the `data` object inside POST /auth/refresh-token's response
+// ─────────────────────────────────────────────
+// REFRESH TOKEN
+// ─────────────────────────────────────────────
+
 export interface RefreshTokenResponseData {
   accessToken: string;
   refreshToken: string;
 }
 
-// Matches the `data` object inside POST /auth/register's response
+// ─────────────────────────────────────────────
+// REGISTER
+// ─────────────────────────────────────────────
+
 export interface RegisterResponseData {
   id: string;
   firstName: string;
