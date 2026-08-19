@@ -1,52 +1,48 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument, Types } from "mongoose";
-import { Department } from "src/departments/schemas/department.schema";
-import { User } from "src/users/schemas/user.schema";
-
-
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { HydratedDocument, Types } from 'mongoose';
+import { Department } from 'src/departments/schemas/department.schema';
+import { User } from 'src/users/schemas/user.schema';
 
 export type DoctorDocument = HydratedDocument<Doctor>;
 
 @Schema({
-    timestamps: true
+  timestamps: true,
 })
-
-
 export class Doctor {
-    @Prop({
-        type: Types.ObjectId,
-        ref: User.name,
-        required: true,
-        unique: true
-    })
-    user!: Types.ObjectId;
+  @Prop({
+    type: Types.ObjectId,
+    ref: User.name,
+    required: true,
+    unique: true,
+  })
+  user!: Types.ObjectId;
 
-    @Prop({
-        type: Types.ObjectId,
-        ref: Department.name,
-        required: true
-    })
-    departmentId!: Types.ObjectId;
+  @Prop({
+    type: Types.ObjectId,
+    ref: Department.name,
+    required: true,
+  })
+  departmentId!: Types.ObjectId;
 
-    @Prop({
-        required: true,
-        trim: true
-    })
-    specialization!: string;
+  @Prop({
+    required: true,
+    trim: true,
+  })
+  specialization!: string;
 
-    @Prop({
-        required: true,
-        trim: true
-    })
-    qualification!: string;
+  @Prop({
+    required: true,
+    trim: true,
+  })
+  qualification!: string;
 
-    @Prop({
-        required: true,
-        min: 0
-    })
-    experience!: number;
+  @Prop({
+    required: true,
+    min: 0,
+  })
+  experience!: number;
 
-    @Prop({
+  @Prop({
     required: true,
     min: 0,
   })
@@ -60,12 +56,12 @@ export class Doctor {
   licenseNumber!: string;
 
   @Prop({
-    default: "",
+    default: '',
   })
   bio!: string;
 
   @Prop({
-    default: "",
+    default: '',
   })
   profileImage!: string;
 
@@ -85,7 +81,6 @@ export class Doctor {
     startTime: string;
     endTime: string;
   };
-
 
   @Prop({
     default: true,

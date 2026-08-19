@@ -3,8 +3,9 @@ import {
   IsEmail,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
-} from "class-validator";
+} from 'class-validator';
 
 export class CreateDoctorDto {
   @IsString()
@@ -54,5 +55,6 @@ export class CreateDoctorDto {
   endTime!: string;
 
   @IsString()
-  bio!: string;
+  @IsOptional()
+  bio?: string;
 }
