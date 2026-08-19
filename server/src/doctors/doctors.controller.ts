@@ -9,75 +9,71 @@ import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import type { CurrentUser } from 'src/auth/interfaces/current-user.interface';
 import { UpdateDoctorDto } from './dto/update-doctor.dot';
 
+
 @Controller('doctors')
 export class DoctorsController {
-    constructor(
-        private readonly doctorsService: DoctorsService,
-    ) {}
+  constructor(private readonly doctorsService: DoctorsService) {}
 
-    //Create Doctor API
-    @Post()
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
-    createDoctor(
-        @Body() createDoctotDto: CreateDoctorDto,
-        @GetUser() user: CurrentUser,
-    ) {
-        return this.doctorsService.createDoctor(createDoctotDto, user)
-    }
+  // Get Doctor Dashboard Stats (Must sit ABOVE :id)
+  @Get('me/stats')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.DOCTOR, Role.ADMIN)
+  getDoctorStats(@GetUser() user: CurrentUser) {
+    return this.doctorsService.getDoctorStats(user);
+  }
 
-    //Get All Doctors
-    @Get()
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
-    getAllDoctors() {
-        return this.doctorsService.getAllDoctors();
-    }
+  // Create Doctor API
+  @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  createDoctor(
+    @Body() createDoctorDto: CreateDoctorDto,
+    @GetUser() user: CurrentUser,
+  ) {
+    return this.doctorsService.createDoctor(createDoctorDto, user);
+  }
 
-    //Get Doctor by iD
+  // Get All Doctors
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.DOCTOR)
+  getAllDoctors() {
+    return this.doctorsService.getAllDoctors();
+  }
 
-    @Get(":id")
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
-    getDoctorById(
-        @Param("id") id: string
-    ) {
-        return this.doctorsService.getDoctorById(id);
-    }
+  // Get Doctor by ID
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.DOCTOR)
+  getDoctorById(@Param('id') id: string) {
+    return this.doctorsService.getDoctorById(id);
+  }
 
+  // Update Doctor Info
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.DOCTOR)
+  updateDoctor(
+    @Param('id') id: string,
+    @Body() updateDoctorDto: UpdateDoctorDto,
+    @GetUser() user: CurrentUser,
+  ) {
+    return this.doctorsService.updateDoctor(id, updateDoctorDto, user);
+  }
 
-    //update doctor info
-    @Patch(":id")
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
-    updateDoctor(
-        @Param("id") id: string,
-        @Body() updateDoctorDto: UpdateDoctorDto,
-        @GetUser() user: CurrentUser,
-    ) {
-        return this.doctorsService.updateDoctor(id, updateDoctorDto, user)
-    }
+  // Delete Doctor
+  @Patch(':id/delete')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  deleteDoctor(@Param('id') id: string, @GetUser() user: CurrentUser) {
+    return this.doctorsService.deleteDoctor(id, user);
+  }
 
-    //delete doctor
-
-    @Patch(":id/delete")
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
-    deleteDoctor(
-        @Param("id") id: string,
-        @GetUser() user: CurrentUser,
-    ) {
-        return this.doctorsService.deleteDoctor(id, user);
-    }
-
-    //Restore Doctot
-    @Patch(":id/restore")
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
-    restoreDoctor(
-        @Param("id") id: string,
-        @GetUser() user: CurrentUser
-    ) {
-        return this.doctorsService.restoreDoctor(id, user)
-    }
+  // Restore Doctor
+  @Patch(':id/restore')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  restoreDoctor(@Param('id') id: string, @GetUser() user: CurrentUser) {
+    return this.doctorsService.restoreDoctor(id, user);
+  }
 }

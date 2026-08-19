@@ -31,10 +31,6 @@ export default function LoginPage() {
     setError(null);
     setSubmitting(true);
 
-    // login() returns { error, role }:
-    //   - error is a string message on failure, or null on success
-    //   - role is only present on success, used to redirect immediately
-    //     without waiting on context state to re-render (see AuthContext.tsx)
     const result = await login({ email, password });
 
     setSubmitting(false);
@@ -44,10 +40,20 @@ export default function LoginPage() {
       return;
     }
 
-    if (result.role === Role.ADMIN) {
-      router.push("/admin");
-    } else {
-      router.push("/dashboard");
+    // Dynamic role-based redirection
+    switch (result.role) {
+      case Role.ADMIN:
+        router.push("/admin");
+        break;
+      case Role.DOCTOR:
+        router.push("/doctor/dashboard");
+        break;
+      case Role.PATIENT:
+        router.push("/patient/dashboard");
+        break;
+      default:
+        router.push("/dashboard");
+        break;
     }
   }
 

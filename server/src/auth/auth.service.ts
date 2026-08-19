@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -13,6 +13,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { MailService } from 'src/mail/mail.service';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 
 
@@ -320,4 +321,38 @@ export class AuthService {
             message: "Password reset successfully",
         }
     }
+
+
+
+
+async changePassword(userId: string, changePasswordDto: ChangePasswordDto) {
+  const { oldPassword, newPassword } = changePasswordDto;
+
+  // Explicitly select the password field using .select('+password')
+  const user = await this.userModel.findById(userId).select('+password');
+
+  if (!user) {
+    throw new NotFoundException('User not found');
+  }
+
+  if (!user.password) {
+    throw new BadRequestException('User record is missing password field');
+  }
+
+  // Verify current password
+  const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+  if (!isPasswordValid) {
+    throw new BadRequestException('Incorrect current password');
+  }
+
+  // Hash new password and save
+  user.password = await bcrypt.hash(newPassword, 10);
+  await user.save();
+
+  return {
+    success: true,
+    message: 'Password changed successfully',
+  };
+}
+
 }
